@@ -29,14 +29,6 @@ use Illuminate\Database\Eloquent\Model;
 class Movie extends Model
 {
     /**
-     * Use readable URLs for API route model binding.
-     */
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

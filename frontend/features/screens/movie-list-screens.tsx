@@ -48,11 +48,11 @@ export function MovieListScreen() {
   const recommendedMovies = filteredMovies
     .slice(1)
     .concat(filteredMovies.slice(0, 1));
-  // const openMovie = (movie: Movie) =>
-  //   router.push({
-  //     pathname: "/movies/[id]",
-  //     params: { id: String(movie.id) },
-  //   });
+  const openMovie = (movie: Movie) =>
+    router.push({
+      pathname: "/movies/[id]",
+      params: { id: String(movie.id) },
+    });
 
   return (
     <View style={styles.root}>
@@ -112,17 +112,17 @@ export function MovieListScreen() {
               <MovieSection
                 title="New Releases"
                 movies={newReleases}
-                // onMoviePress={openMovie}
+                onMoviePress={openMovie}
               />
               <MovieSection
                 title="Popular in cinemas"
                 movies={popularMovies}
-                // onMoviePress={openMovie}
+                onMoviePress={openMovie}
               />
               <MovieSection
                 title="Recommended for you"
                 movies={recommendedMovies}
-                // onMoviePress={openMovie}
+                onMoviePress={openMovie}
               />
             </View>
           )}

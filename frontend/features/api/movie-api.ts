@@ -102,7 +102,7 @@ export async function fetchMovies() {
   return result.data.map(mapMovie) satisfies MovieListResponse["data"];
 }
 
-export async function fetchMovie(movieSlug: string) {
+export async function fetchMovie(movieSlug: number) {
   const response = await fetch(`${API_BASE_URL}/api/movies/${movieSlug}`);
 
   if (!response.ok) {
