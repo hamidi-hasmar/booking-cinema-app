@@ -2,6 +2,8 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 import {
+  BookingTransactionPayload,
+  BookingTransactionResponse,
   ConcessionItemsResponse,
   Movie,
   MovieBookingOptionsResponse,
@@ -231,6 +233,26 @@ export async function fetchConcessionItems() {
   if (!Array.isArray(result.data)) {
     throw new Error("Unable to load food and beverages");
   }
+
+  return result.data;
+}
+
+export async function createBookingTransaction(
+  payload: BookingTransactionPayload,
+) {
+  const response = await fetch(`${API_BASE_URL}/api/bookings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to complete payment");
+  }
+
+  const result = (await response.json()) as BookingTransactionResponse;
 
   return result.data;
 }

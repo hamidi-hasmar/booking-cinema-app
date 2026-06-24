@@ -50,6 +50,7 @@ export function BookingSummaryScreen() {
     hall?: string;
     date?: string;
     time?: string;
+    showtimeId?: string;
     seats?: string;
     ticketTotal?: string;
     concessions?: string;
@@ -64,6 +65,30 @@ export function BookingSummaryScreen() {
   const concessionTotal = Number(params.concessionTotal ?? 0);
   const serviceCharge = 50;
   const grandTotal = ticketTotal + concessionTotal + serviceCharge;
+
+  function proceedToPayment() {
+    if (!params.id) {
+      return;
+    }
+
+    router.push({
+      pathname: "/movies/payment/[id]",
+      params: {
+        id: params.id,
+        ticketType: params.ticketType ?? "",
+        location: params.location ?? "",
+        hall: params.hall ?? "",
+        date: params.date ?? "",
+        time: params.time ?? "",
+        showtimeId: params.showtimeId ?? "",
+        seats: params.seats ?? "",
+        ticketTotal: String(ticketTotal),
+        concessions: params.concessions ?? "[]",
+        concessionTotal: String(concessionTotal),
+        grandTotal: String(grandTotal),
+      },
+    });
+  }
 
   return (
     <View style={styles.root}>
@@ -172,7 +197,7 @@ export function BookingSummaryScreen() {
             </ScrollView>
 
             <View style={styles.bottomBar}>
-              <Pressable style={styles.payButton}>
+              <Pressable style={styles.payButton} onPress={proceedToPayment}>
                 <Text style={styles.payText}>Proceed to payment</Text>
               </Pressable>
             </View>

@@ -191,6 +191,5 @@ export type BookingTransaction = {
 };
 
 export type BookingTransactionResponse = {
-  success: boolean;
   data: BookingTransaction;
 };
