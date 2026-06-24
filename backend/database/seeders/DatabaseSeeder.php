@@ -3,8 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\Movie;
+use App\Models\CinemaHall;
+use App\Models\CinemaLocation;
+use App\Models\Showtime;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -109,5 +113,81 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ], ['slug']);
+
+        $locations = [
+            [
+                'name' => 'Mid Valley Megamall',
+                'city' => 'Kuala Lumpur',
+                'address' => 'Lingkaran Syed Putra, Mid Valley City',
+                'sort_order' => 1,
+                'halls' => ['Hall 1', 'Hall 2'],
+            ],
+            [
+                'name' => 'Sunway Velocity Mall',
+                'city' => 'Kuala Lumpur',
+                'address' => 'Jalan Peel, Maluri',
+                'sort_order' => 2,
+                'halls' => ['Hall 3', 'Hall 4'],
+            ],
+            [
+                'name' => 'IOI City Mall',
+                'city' => 'Putrajaya',
+                'address' => 'Lebuh IRC, IOI Resort City',
+                'sort_order' => 3,
+                'halls' => ['IMAX Hall', 'Hall 5'],
+            ],
+        ];
+
+        foreach ($locations as $locationIndex => $locationData) {
+            $location = CinemaLocation::query()->updateOrCreate(
+                ['name' => $locationData['name']],
+                [
+                    'city' => $locationData['city'],
+                    'address' => $locationData['address'],
+                    'sort_order' => $locationData['sort_order'],
+                ],
+            );
+
+            foreach ($locationData['halls'] as $hallIndex => $hallName) {
+                CinemaHall::query()->updateOrCreate(
+                    [
+                        'cinema_location_id' => $location->id,
+                        'name' => $hallName,
+                    ],
+                    [
+                        'seat_rows' => 8,
+                        'seats_per_row' => 8,
+                        'sort_order' => ($locationIndex * 10) + $hallIndex + 1,
+                    ],
+                );
+            }
+        }
+
+        $movies = Movie::query()->orderBy('sort_order')->get();
+        $halls = CinemaHall::query()->with('location')->orderBy('sort_order')->get();
+        $baseDate = Carbon::today()->addDay();
+        $times = ['09:20', '11:40', '13:20', '15:30', '17:40', '19:30', '21:20'];
+
+        foreach ($movies as $movieIndex => $movie) {
+            foreach ($halls as $hallIndex => $hall) {
+                for ($day = 0; $day < 5; $day++) {
+                    foreach (array_slice($times, ($movieIndex + $hallIndex + $day) % 3, 3) as $time) {
+                        $startsAt = Carbon::parse($baseDate->copy()->addDays($day)->toDateString().' '.$time);
+
+                        Showtime::query()->updateOrCreate(
+                            [
+                                'movie_id' => $movie->id,
+                                'cinema_hall_id' => $hall->id,
+                                'starts_at' => $startsAt,
+                            ],
+                            [
+                                'ticket_type' => 'Classic',
+                                'price_cents' => 2500 + ($hallIndex * 250),
+                            ],
+                        );
+                    }
+                }
+            }
+        }
     }
 }

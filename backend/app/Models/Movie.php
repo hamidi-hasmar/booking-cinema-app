@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'title',
@@ -28,6 +29,14 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Movie extends Model
 {
+    /**
+     * @return HasMany<Showtime, $this>
+     */
+    public function showtimes(): HasMany
+    {
+        return $this->hasMany(Showtime::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

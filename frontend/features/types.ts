@@ -50,12 +50,18 @@ export type BookingDate = {
 };
 
 export type BookingHall = {
+  id: number;
   name: string;
+  seatRows: number;
+  seatsPerRow: number;
   dates: BookingDate[];
 };
 
 export type BookingLocation = {
+  id: number;
   name: string;
+  city: string | null;
+  address: string | null;
   halls: BookingHall[];
 };
 
@@ -71,7 +77,6 @@ export type MovieBookingOptions = {
 };
 
 export type MovieBookingOptionsResponse = {
-  success: boolean;
   data: MovieBookingOptions;
 };
 
@@ -82,10 +87,35 @@ export type SeatLock = {
   updatedAt: string;
 };
 
+export type SeatStatus = "available" | "locked";
+
+export type ShowtimeSeat = {
+  seatNumber: string;
+  row: string;
+  column: number;
+  status: SeatStatus;
+  lockedByCurrentUser: boolean;
+  lockedUntil: string | null;
+};
+
+export type ShowtimeSeatMap = {
+  showtimeId: number;
+  seatRows: number;
+  seatsPerRow: number;
+  lockExpiresInSeconds: number;
+  seats: ShowtimeSeat[];
+};
+
 export type SeatLocksResponse = {
-  success: boolean;
+  data: ShowtimeSeatMap;
+};
+
+export type SeatLockResponse = {
   data: {
-    locks: SeatLock[];
+    seatNumber: string;
+    status: SeatStatus;
+    lockedByCurrentUser?: boolean;
+    lockedUntil?: string;
   };
 };
 
