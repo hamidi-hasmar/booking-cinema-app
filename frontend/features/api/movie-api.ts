@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 import {
+  ConcessionItemsResponse,
   Movie,
   MovieBookingOptionsResponse,
   MovieListResponse,
@@ -214,6 +215,22 @@ export async function releaseShowtimeSeat(
   }
 
   const result = (await response.json()) as SeatLockResponse;
+
+  return result.data;
+}
+
+export async function fetchConcessionItems() {
+  const response = await fetch(`${API_BASE_URL}/api/concession-items`);
+
+  if (!response.ok) {
+    throw new Error("Unable to load food and beverages");
+  }
+
+  const result = (await response.json()) as ConcessionItemsResponse;
+
+  if (!Array.isArray(result.data)) {
+    throw new Error("Unable to load food and beverages");
+  }
 
   return result.data;
 }

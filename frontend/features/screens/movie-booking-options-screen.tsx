@@ -159,6 +159,35 @@ export function MovieBookingOptionsScreen() {
     }
   }
 
+  function proceedToFood() {
+    if (
+      !movieId ||
+      !selectedTicketType ||
+      !selectedLocation ||
+      !selectedHall ||
+      !selectedDate ||
+      !selectedTime ||
+      selectedSeats.length === 0
+    ) {
+      return;
+    }
+
+    router.push({
+      pathname: "/movies/food-beverages/[id]",
+      params: {
+        id: String(movieId),
+        ticketType: selectedTicketType.label,
+        location: selectedLocation.name,
+        hall: selectedHall.name,
+        date: selectedDate.date,
+        time: selectedTime.startTime,
+        showtimeId: String(selectedTime.id),
+        seats: selectedSeats.join(","),
+        ticketTotal: String(ticketSubtotal),
+      },
+    });
+  }
+
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
@@ -410,6 +439,7 @@ export function MovieBookingOptionsScreen() {
               </Pressable>
               <Pressable
                 disabled={!canProceed}
+                onPress={proceedToFood}
                 style={[
                   styles.proceedButton,
                   !canProceed && styles.disabledProceedButton,

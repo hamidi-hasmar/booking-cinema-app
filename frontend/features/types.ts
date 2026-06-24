@@ -127,10 +127,12 @@ export type ConcessionItem = {
   description: string;
   category: ConcessionCategory;
   price: number;
+  originalPrice: number | null;
+  discountPercent: number | null;
+  imageUrl: string | null;
 };
 
 export type ConcessionItemsResponse = {
-  success: boolean;
   data: ConcessionItem[];
 };
 
@@ -149,6 +151,7 @@ export type BookingSummaryParams = {
   seats: string;
   ticketTotal: string;
   concessions?: string;
+  concessionTotal?: string;
 };
 
 export type BookingTransactionPayload = {
