@@ -249,7 +249,17 @@ export async function createBookingTransaction(
   });
 
   if (!response.ok) {
-    throw new Error("Unable to complete payment");
+    const errorBody = await response.text();
+
+    console.error("Booking payment failed", {
+      status: response.status,
+      body: errorBody,
+      payload,
+    });
+
+    throw new Error(
+      `Unable to complete payment. Server returned ${response.status}.`,
+    );
   }
 
   const result = (await response.json()) as BookingTransactionResponse;
