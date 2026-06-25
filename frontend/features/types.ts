@@ -87,7 +87,7 @@ export type SeatLock = {
   updatedAt: string;
 };
 
-export type SeatStatus = "available" | "locked";
+export type SeatStatus = "available" | "locked" | "booked";
 
 export type ShowtimeSeat = {
   seatNumber: string;

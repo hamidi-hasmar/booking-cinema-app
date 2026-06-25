@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\SeatLock;
 use App\Models\Showtime;
+use App\Models\Booking;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,20 +32,30 @@ class ShowtimeSeatController extends Controller
             ->get()
             ->keyBy('seat_number');
 
+        $bookedSeats = Booking::query()
+            ->where('showtime_id', $showtime->id)
+            ->where('status', 'paid')
+            ->get()
+            ->flatMap(fn(Booking $booking) => $booking->seats ?? [])
+            ->unique()
+            ->values();
+
         $seats = [];
 
         foreach (range('A', chr(ord('A') + $showtime->hall->seat_rows - 1)) as $row) {
             foreach (range(1, $showtime->hall->seats_per_row) as $number) {
-                $seatNumber = $row.$number;
+                $seatNumber = $row . $number;
+                $isBooked = $bookedSeats->contains($seatNumber);
+
                 $lock = $locks->get($seatNumber);
 
                 $seats[] = [
                     'seatNumber' => $seatNumber,
                     'row' => $row,
                     'column' => $number,
-                    'status' => $lock ? 'locked' : 'available',
-                    'lockedByCurrentUser' => $lock && $clientId && $lock->locked_by === $clientId,
-                    'lockedUntil' => $lock?->expires_at?->toISOString(),
+                    'status' => $isBooked ? 'booked' : ($lock ? 'locked' : 'available'),
+                    'lockedByCurrentUser' => ! $isBooked && $lock && $clientId && $lock->locked_by === $clientId,
+                    'lockedUntil' => $isBooked ? null : $lock?->expires_at?->toISOString(),
                 ];
             }
         }
@@ -77,6 +88,16 @@ class ShowtimeSeatController extends Controller
 
         $lock = DB::transaction(function () use ($showtime, $seatNumber, $clientId) {
             $this->deleteExpiredLocks($showtime);
+
+            $isBooked = Booking::query()
+                ->where('showtime_id', $showtime->id)
+                ->where('status', 'paid')
+                ->get()
+                ->contains(fn(Booking $booking) => in_array($seatNumber, $booking->seats ?? [], true));
+
+            if ($isBooked) {
+                abort(409, 'Seat is already booked');
+            }
 
             $existingLock = SeatLock::query()
                 ->where('showtime_id', $showtime->id)

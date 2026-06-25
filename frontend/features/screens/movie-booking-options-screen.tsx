@@ -68,11 +68,11 @@ export function MovieBookingOptionsScreen() {
 
   const canProceed = Boolean(
     selectedTicketType &&
-      selectedLocation &&
-      selectedHall &&
-      selectedDate &&
-      selectedTime &&
-      selectedSeats.length > 0,
+    selectedLocation &&
+    selectedHall &&
+    selectedDate &&
+    selectedTime &&
+    selectedSeats.length > 0,
   );
 
   const selectedSummary = useMemo(() => {
@@ -141,6 +141,11 @@ export function MovieBookingOptionsScreen() {
         return;
       }
 
+      if (seat.status === "booked") {
+        setSeatError("Seat is already booked");
+        return;
+      }
+
       if (seat.status === "locked") {
         setSeatError("Seat is already locked by another user");
         return;
@@ -154,7 +159,9 @@ export function MovieBookingOptionsScreen() {
       );
     } catch (lockError) {
       setSeatError(
-        lockError instanceof Error ? lockError.message : "Unable to update seat",
+        lockError instanceof Error
+          ? lockError.message
+          : "Unable to update seat",
       );
     }
   }
@@ -500,7 +507,9 @@ function SeatMap({
       <View style={styles.seatGrid}>
         {Array.from({ length: seatMap.seatRows }).map((_, rowIndex) => {
           const rowLabel = String.fromCharCode("A".charCodeAt(0) + rowIndex);
-          const rowSeats = seatMap.seats.filter((seat) => seat.row === rowLabel);
+          const rowSeats = seatMap.seats.filter(
+            (seat) => seat.row === rowLabel,
+          );
 
           return (
             <View key={rowLabel} style={styles.seatRow}>
@@ -510,7 +519,7 @@ function SeatMap({
                   const isSelected =
                     seat.lockedByCurrentUser ||
                     selectedSeats.includes(seat.seatNumber);
-                  const isUnavailable = seat.status === "locked" && !isSelected;
+                  const isUnavailable = (seat.status === "booked" || seat.status === "locked") && !isSelected;
 
                   return (
                     <Pressable
@@ -529,7 +538,7 @@ function SeatMap({
                           isSelected && styles.selectedSeatButtonText,
                         ]}
                       >
-                        {seat.column}
+                        {isUnavailable ? "X" : seat.column}
                       </Text>
                     </Pressable>
                   );

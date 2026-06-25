@@ -21,8 +21,20 @@ class BookingService
             $data['grandTotal'] - $data['ticketTotal'] - $data['concessionTotal'],
         );
 
+        $alreadyBookedSeats = Booking::query()
+            ->where('showtime_id', $data['showtimeId'])
+            ->where('status', 'paid')
+            ->get()
+            ->flatMap(fn(Booking $booking) => $booking->seats ?? [])
+            ->intersect($data['seats'])
+            ->values();
+
+        if ($alreadyBookedSeats->isNotEmpty()) {
+            abort(409, 'One or more selected seats are already booked');
+        }
+
         $booking = Booking::query()->create([
-            'reference' => 'CB'.now()->format('ymd').strtoupper(Str::random(6)),
+            'reference' => 'CB' . now()->format('ymd') . strtoupper(Str::random(6)),
             'showtime_id' => $data['showtimeId'],
             'ticket_type' => $data['ticketType'],
             'location' => $data['location'],
@@ -47,5 +59,4 @@ class BookingService
 
         return $booking;
     }
-
 }
